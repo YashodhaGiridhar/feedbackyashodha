@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Anonymous Faculty Feedback</title>
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        max-width: 700px;
+        margin: 40px auto;
+        padding: 20px;
+        background: #f7f7f7;
+    }
+
+    h1 {
+        text-align: center;
+    }
+
+    form {
+        background: #fff;
+        padding: 20px;
+        border-radius: 10px;
+        display: grid;
+        gap: 15px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    label {
+        font-weight: bold;
+    }
+
+    input, select, textarea {
+        width: 100%;
+        padding: 10px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        font-size: 16px;
+    }
+
+    textarea {
+        height: 120px;
+        resize: vertical;
+    }
+
+    button {
+        padding: 12px;
+        background: #0066ff;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 18px;
+    }
+
+    button:hover {
+        background: #004ccc;
+    }
+
+    .note {
+        font-size: 14px;
+        background: #eef3ff;
+        padding: 10px;
+        border-left: 4px solid #3366ff;
+        border-radius: 6px;
+    }
+
+    .success {
+        color: green;
+        font-weight: bold;
+    }
+
+    .error {
+        color: red;
+        font-weight: bold;
+    }
+</style>
+
+</head>
+<body>
+
+<h1>Anonymous Faculty Feedback</h1>
+
+<p class="note">Your feedback is anonymous. <strong>Do not include any personal details.</strong></p>
+
+<form id="feedbackForm">
+
+    <div>
+        <label>Faculty Name</label>
+        <input id="facultyName" required placeholder="e.g., Dr. Kumar">
+    </div>
+
+    <div>
+        <label>Course Code</label>
+        <input id="courseCode" required placeholder="e.g., CSE101">
+    </div>
+
+    <div>
+        <label>Rating (1–5)</label>
+        <select id="rating" required>
+            <option value="">Select</option>
+            <option>1</option>
+            <option>2</option>
+            <option>3</option>
+            <option>4</option>
+            <option>5</option>
+        </select>
+    </div>
+
+    <div>
+        <label>Feedback Category</label>
+        <select id="category" required>
+            <option value="">Select</option>
+            <option>Teaching quality</option>
+            <option>Course content</option>
+            <option>Assignments</option>
+            <option>Assessment</option>
+            <option>Classroom environment</option>
+            <option>Other</option>
+        </select>
+    </div>
+
+    <div>
+        <label>Comments</label>
+        <textarea id="comments" placeholder="Your anonymous feedback..."></textarea>
+    </div>
+
+    <button type="submit">Submit Feedback</button>
+
+    <p id="message"></p>
+</form>
+
+<script>
+    const functionUrl = "/api/SubmitFeedBack"; // ← replace
+
+    document.getElementById("feedbackForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const msg = document.getElementById("message");
+        msg.textContent = "";
+        msg.className = "";
+
+        const payload = {
+            faculty_name: facultyName.value.trim(),
+            course_code: courseCode.value.trim(),
+            rating: parseInt(rating.value),
+            category: category.value.trim(),
+            comments: comments.value.trim()
+        };
+
+        if (!payload.faculty_name || !payload.course_code || !payload.rating || !payload.category) {
+            msg.textContent = "All fields except comments are required.";
+            msg.className = "error";
+            return;
+        }
+
+        try {
+            const res = await fetch(functionUrl, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+
+            if (res.ok) {
+                msg.textContent = "Your anonymous feedback has been submitted!";
+                msg.className = "success";
+                document.getElementById("feedbackForm").reset();
+            } else {
+                msg.textContent = "Error submitting feedback.";
+                msg.className = "error";
+            }
+        } catch (err) {
+            msg.textContent = "Network error: " + err.message;
+            msg.className = "error";
+        }
+    });
+</script>
+
+</body>
+</html>
